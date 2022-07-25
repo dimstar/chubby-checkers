@@ -1,38 +1,61 @@
+h1,
+h2,
+h3 {
+  margin: 0;
+}
+
+button {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
 .App {
+  background: rgb(205,70,25);
+  background: linear-gradient(180deg, rgba(205,70,25,1) 19%, rgba(187,14,131,1) 35%, rgba(224,218,6,1) 70%, rgba(0,212,255,1) 100%);
   text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  padding-bottom: 24px;
   color: white;
 }
 
-.App-link {
-  color: #61dafb;
+.gameBoard {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 6px;
+  max-width: fit-content;
+  margin-inline: auto;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.playerMenu, .gameMenu {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+.button {
+  width: 64px;
+  height: 64px;
+  margin: auto;
+  border: 2px solid blue;
+}
+
+.menuButton {
+  width: 128px;
+  border: 2px solid purple;
 }
