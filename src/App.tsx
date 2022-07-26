@@ -45,18 +45,18 @@ function App() {
 
   return (
     <div className='App'>
-      <header className='App-header'>
+      <header className="App-header">
         <h1>TIK TAK TOE</h1>
-        {winState !== null ? (
-          <h2 className='currentPlayer'>
-            WINNING Player: <Avatar gamePiece={currentPlayer} />
-          </h2>
-        ) : (
-          <h2 className='currentPlayer'>
-            Current Player: <Avatar gamePiece={currentPlayer} />
-          </h2>
+        <h2 className='currentPlayer'>
+          Current Player: <Avatar gamePiece={currentPlayer} />
+        </h2>
+        {winState === null || (
+          <div className="theWinner">
+            <h2 className='currentPlayer'>
+              <Avatar gamePiece={currentPlayer} /> WON!
+            </h2>
+          </div>
         )}
-
       </header>
       <div className='gameBoard'>
         {game.map((x, xi) =>
