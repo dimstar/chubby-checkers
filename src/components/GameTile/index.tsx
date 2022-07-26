@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface ButtonProps {
+interface GameTileProps {
   x: number;
   y: number;
   // eslint-disable-next-line no-empty-pattern
@@ -8,7 +8,7 @@ interface ButtonProps {
   children: React.ReactElement | string;
 }
 
-function Button({ x, y, action, children }: ButtonProps) {
+function GameTile({ x, y, action, children }: GameTileProps) {
   return (
     <button className='button' type='button' onClick={action([x, y])}>
       {children}
@@ -16,4 +16,4 @@ function Button({ x, y, action, children }: ButtonProps) {
   );
 }
 
-export default Button;
+export default GameTile;
