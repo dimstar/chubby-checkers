@@ -29,7 +29,7 @@ function App() {
    * @param boardPosition
    * @returns closure
    */
-  const handleAction = (boardPosition: number[]) => () => {
+  const handleMove = (boardPosition: number[]) => () => {
     // The position has been played, bail!
     if (game[boardPosition[0]][boardPosition[1]] !== null) {
       return;
@@ -38,7 +38,6 @@ function App() {
     gameState[boardPosition[0]][boardPosition[1]] = currentPlayer;
     setGame(gameState);
     const winner = checkWinState(gameState, boardPosition, currentPlayer);
-    console.log({ winner })
     if (winner !== null) {
       setWinState(winner);
     }
@@ -63,7 +62,7 @@ function App() {
         {game.map((x, xi) =>
           x.map((y, yi) => (
             // eslint-disable-next-line react/no-array-index-key
-            <GameTile x={xi} y={yi} action={handleAction} key={`${xi},${yi}`}>
+            <GameTile x={xi} y={yi} action={handleMove} key={`${xi},${yi}`}>
               <Avatar gamePiece={game[xi][yi]} />
             </GameTile>
           ))
