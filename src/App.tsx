@@ -1,51 +1,28 @@
 import React from 'react';
+import GameTile from './components/GameTile';
+import Avatar from './components/Avatar';
+import { GAME_ORIGIN, PLAYER_1, PLAYER_2 } from './constants';
+import deepCopy from './utils/deepCpoy';
+import { Game, GamePiece, Players } from './types';
+// styles
 import './App.css';
-import Button from './components/Button';
-
-/**
- * Util function for deep copy of nested array
- * @param nestedArr
- * @returns
- */
-function deepCopy<Type>(nestedArr: Type[][]): Type[][] {
-  return JSON.parse(JSON.stringify(nestedArr));
-}
-
-const player1 = 0;
-const player2 = 1;
-
-type Players = typeof player1 | typeof player2;
-
-type GamePiece = null | Players;
-
-type Game = GamePiece[][];
-
-const gameOrigin = [
-  [null, null, null],
-  [null, null, null],
-  [null, null, null]
-];
-
-interface AvatarProps {
-  gamePiece: GamePiece;
-}
-
-function Avatar({ gamePiece: player }: AvatarProps) {
-  if (player === player1) {
-    return <>💀</>;
-  }
-  if (player === player2) {
-    return <>❤️</>;
-  }
-
-  return <>&nbsp;</>;
-}
+import checkWinState from './lib/checkWinState';
 
 function App() {
-  const neverused = '';
-  const players: Players[] = [player1, player2];
-  const [game, setGame] = React.useState<Game>(deepCopy(gameOrigin));
+  const players: Players[] = [PLAYER_1, PLAYER_2];
+  const [game, setGame] = React.useState<Game>(deepCopy(GAME_ORIGIN));
   const [currentPlayer, setCurrentPlayer] = React.useState<Players>(0);
+  const [winState, setWinState] = React.useState<GamePiece>(null);
+
+  /**
+ * Resets the game state
+ */
+  const handleReset = () => {
+    const originCopy = deepCopy(GAME_ORIGIN);
+    setGame(originCopy);
+    setWinState(null);
+  };
+
 
   /**
    * Returns a closure to handle board position selected by current player
@@ -60,31 +37,35 @@ function App() {
     const gameState = deepCopy(game);
     gameState[boardPosition[0]][boardPosition[1]] = currentPlayer;
     setGame(gameState);
-  };
-
-  /**
-   * Resets the game state
-   */
-  const handleReset = () => {
-    const originCopy = deepCopy(gameOrigin);
-    setGame(originCopy);
+    const winner = checkWinState(gameState, boardPosition, currentPlayer);
+    console.log({ winner })
+    if (winner !== null) {
+      setWinState(winner);
+    }
   };
 
   return (
     <div className='App'>
       <header className='App-header'>
         <h1>TIK TAK TOE</h1>
-        <h2 className='currentPlayer'>
-          Current Player: <Avatar gamePiece={currentPlayer} />
-        </h2>
+        {winState !== null ? (
+          <h2 className='currentPlayer'>
+            WINNING Player: <Avatar gamePiece={currentPlayer} />
+          </h2>
+        ) : (
+          <h2 className='currentPlayer'>
+            Current Player: <Avatar gamePiece={currentPlayer} />
+          </h2>
+        )}
+
       </header>
       <div className='gameBoard'>
         {game.map((x, xi) =>
           x.map((y, yi) => (
             // eslint-disable-next-line react/no-array-index-key
-            <Button x={xi} y={yi} action={handleAction} key={`${xi},${yi}`}>
+            <GameTile x={xi} y={yi} action={handleAction} key={`${xi},${yi}`}>
               <Avatar gamePiece={game[xi][yi]} />
-            </Button>
+            </GameTile>
           ))
         )}
       </div>
@@ -95,6 +76,7 @@ function App() {
             className='menuButton'
             type='button'
             onClick={() => setCurrentPlayer(somePlayer)}
+            disabled={winState !== null}
           >
             <Avatar gamePiece={somePlayer} />
           </button>
