@@ -25,6 +25,9 @@ const checkWinState = (
     i += 1;
   }
 
+  // reset the index
+  i = 0;
+
   // check cols
   while (i < n) {
     if (gameboard[i][y] !== currentPlayer) {
@@ -38,6 +41,9 @@ const checkWinState = (
 
     i += 1;
   }
+
+  // reset the index
+  i = 0;
 
   // check diagnal
   if (x === y) {
@@ -54,6 +60,9 @@ const checkWinState = (
       i += 1;
     }
   }
+
+  // reset the index
+  i = 0;
 
   // check anti diagnal
   if (x + y === n - 1) {
