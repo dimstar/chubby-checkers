@@ -1,4 +1,4 @@
-import { Game, GamePiece, Players } from '../types';
+import { Game, GameTileState, Players } from '../types';
 
 // Shout out to this! https://stackoverflow.com/a/1056352
 
@@ -6,7 +6,7 @@ const checkWinState = (
   gameboard: Game,
   move: number[],
   currentPlayer: Players
-): GamePiece => {
+): GameTileState => {
   const n = gameboard.length;
   const [x, y] = move;
   let i = 0;
