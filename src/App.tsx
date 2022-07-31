@@ -10,16 +10,28 @@ import { Game, GameTileState, Players } from './types';
 // styles
 import './App.css';
 
-const possibleMoves = {
+export interface Direction {
+  x: number;
+  y: number;
+}
+
+export interface Directions {
+  nw: Direction;
+  ne: Direction;
+  se: Direction;
+  sw: Direction;
+}
+
+const possibleMoves: Directions = {
   nw: { x: -1, y: -1 },
   ne: { x: 1, y: -1 },
   se: { x: 1, y: 1 },
   sw: { x: -1, y: 1 }
 };
 
-const possibleAttacks = {
+const possibleAttacks: Directions = {
   nw: { x: -2, y: 2 },
-  ne: { x: 2, y: 2 },
+  ne: { x: 2, y: -2 },
   se: { x: 2, y: 2 },
   sw: { x: -2, y: 2 }
 };
@@ -28,6 +40,7 @@ function App() {
   const players: Players[] = [PLAYER_1, PLAYER_2];
   const [game, setGame] = React.useState<Game>(deepCopy(GAME_ORIGIN));
   const [currentPlayer, setCurrentPlayer] = React.useState<Players>(0);
+  const [opponent, setOpponent] = React.useState<Players>(0);
   const [winState, setWinState] = React.useState<GameTileState>(null);
   const [activePiece, setActivePiece] = React.useState<GameTileState[]>([
     null,
@@ -48,8 +61,8 @@ function App() {
    * @param boardPosition
    * @returns closure
    */
-  const handleMove = (attemptCoords: number[]) => {
-    // The position has been played, bail!
+  const handleMovePiece = (attemptCoords: number[]) => {
+    // The position already contains a piece, bail!
     if (game[attemptCoords[0]][attemptCoords[1]] !== null) {
       return;
     }
@@ -60,6 +73,7 @@ function App() {
     Object.entries(possibleMoves).forEach(([dr, checkMove]) => {
       const ax = activePiece[0];
       const ay = activePiece[1];
+      // reduntant null check
       if (ax === null || ay === null) {
         return;
       }
@@ -73,6 +87,44 @@ function App() {
       setGame(gameState);
       setActivePiece([null, null]);
     });
+
+    (Object.keys(possibleAttacks) as (keyof typeof possibleAttacks)[]).forEach(
+      (dr) => {
+        const checkAttack = possibleAttacks[dr];
+        const ax = activePiece[0];
+        const ay = activePiece[1];
+        // reduntant null check
+        if (ax === null || ay === null) {
+          return;
+        }
+        // ignore out of bounds
+        if (gameState[possibleMoves[dr].x + ax] === undefined) {
+          return;
+        }
+        if (
+          gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
+          undefined
+        ) {
+          return;
+        }
+        // check attackable position one space back
+        if (
+          gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
+          opponent
+        ) {
+          return;
+        }
+        // if attack is invalid, do nothing
+        if (!isEqual(attemptCoords, [checkAttack.x + ax, checkAttack.y + ay])) {
+          return;
+        }
+        // Attack was valid, change game state and clear the active piece
+        gameState[ax][ay] = null;
+        gameState[attemptCoords[0]][attemptCoords[1]] = currentPlayer;
+        setGame(gameState);
+        setActivePiece([null, null]);
+      }
+    );
 
     // TODO: must reimplement win state logic
     // const winner = checkWinState(gameState, boardPosition, currentPlayer);
@@ -91,7 +143,7 @@ function App() {
     }
 
     const coordsOnly = [pieceCoords[0], pieceCoords[1]];
-    handleMove(coordsOnly);
+    handleMovePiece(coordsOnly);
   };
 
   return (
@@ -133,7 +185,10 @@ function App() {
             key={`${somePlayer}`}
             className='menuButton'
             type='button'
-            onClick={() => setCurrentPlayer(somePlayer)}
+            onClick={() => {
+              setCurrentPlayer(somePlayer);
+              setOpponent(somePlayer === PLAYER_1 ? PLAYER_1 : PLAYER_2);
+            }}
             disabled={winState !== null}
           >
             <Avatar player={somePlayer} />
