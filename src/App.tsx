@@ -97,7 +97,7 @@ function App() {
   return (
     <div className='App'>
       <header className='App-header'>
-        <h1>TIK TAK TOE</h1>
+        <h1>CHUBBY CHECKERS</h1>
         <h2 className='currentPlayer'>
           Current Player: <Avatar player={currentPlayer} />
           <br />

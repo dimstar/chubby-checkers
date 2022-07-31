@@ -1,5 +1,5 @@
 {
-  "name": "tik-tak-toe",
+  "name": "chubby-checkers",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
