@@ -40,7 +40,7 @@ function App() {
   const players: Players[] = [PLAYER_1, PLAYER_2];
   const [game, setGame] = React.useState<Game>(deepCopy(GAME_ORIGIN));
   const [currentPlayer, setCurrentPlayer] = React.useState<Players>(0);
-  const [opponent, setOpponent] = React.useState<Players>(0);
+  const [opponent, setOpponent] = React.useState<Players>(1);
   const [winState, setWinState] = React.useState<GameTileState>(null);
   const [activePiece, setActivePiece] = React.useState<GameTileState[]>([
     null,
@@ -112,6 +112,7 @@ function App() {
           gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
           opponent
         ) {
+          gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] = null;
           return;
         }
         // if attack is invalid, do nothing
@@ -187,7 +188,7 @@ function App() {
             type='button'
             onClick={() => {
               setCurrentPlayer(somePlayer);
-              setOpponent(somePlayer === PLAYER_1 ? PLAYER_1 : PLAYER_2);
+              setOpponent(somePlayer === PLAYER_1 ? PLAYER_2 : PLAYER_1);
             }}
             disabled={winState !== null}
           >
