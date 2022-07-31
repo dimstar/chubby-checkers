@@ -6,11 +6,16 @@ interface GameTileProps {
   // eslint-disable-next-line no-empty-pattern
   action: ([]) => () => void;
   children: React.ReactElement | string;
+  active: boolean;
 }
 
-function GameTile({ x, y, action, children }: GameTileProps) {
+function GameTile({ x, y, action, active, children }: GameTileProps) {
   return (
-    <button className='button' type='button' onClick={action([x, y])}>
+    <button
+      className={`button ${active ? 'active' : ''}`}
+      type='button'
+      onClick={action([x, y])}
+    >
       {children}
     </button>
   );

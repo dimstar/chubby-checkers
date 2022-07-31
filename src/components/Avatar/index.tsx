@@ -1,12 +1,12 @@
 import React from 'react';
 import { PLAYER_1, PLAYER_2 } from '../../constants';
-import { GamePiece } from '../../types';
+import { GameTileState } from '../../types';
 
 interface AvatarProps {
-  gamePiece: GamePiece;
+  player: GameTileState;
 }
 
-function Avatar({ gamePiece: player }: AvatarProps): JSX.Element {
+function Avatar({ player }: AvatarProps): JSX.Element {
   if (player === PLAYER_1) {
     return <>💀</>;
   }
