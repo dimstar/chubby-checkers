@@ -107,17 +107,16 @@ function App() {
         ) {
           return;
         }
+        // if attack is invalid, do nothing
+        if (!isEqual(attemptCoords, [checkAttack.x + ax, checkAttack.y + ay])) {
+          return;
+        }
         // check attackable position one space back
         if (
           gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
           opponent
         ) {
           gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] = null;
-          return;
-        }
-        // if attack is invalid, do nothing
-        if (!isEqual(attemptCoords, [checkAttack.x + ax, checkAttack.y + ay])) {
-          return;
         }
         // Attack was valid, change game state and clear the active piece
         gameState[ax][ay] = null;
