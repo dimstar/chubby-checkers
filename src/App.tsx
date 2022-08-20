@@ -9,43 +9,16 @@ import { Game, GameTileState, Players } from './types';
 
 // styles
 import './App.css';
-
-export interface Direction {
-  x: number;
-  y: number;
-}
-
-export interface Directions {
-  nw: Direction;
-  ne: Direction;
-  se: Direction;
-  sw: Direction;
-}
-
-const possibleMoves: Directions = {
-  nw: { x: -1, y: -1 },
-  ne: { x: 1, y: -1 },
-  se: { x: 1, y: 1 },
-  sw: { x: -1, y: 1 }
-};
-
-const possibleAttacks: Directions = {
-  nw: { x: -2, y: -2 },
-  ne: { x: 2, y: -2 },
-  se: { x: 2, y: 2 },
-  sw: { x: -2, y: 2 }
-};
+import findMoves from './lib/findMoves';
 
 function App() {
   const players: Players[] = [PLAYER_1, PLAYER_2];
   const [game, setGame] = React.useState<Game>(deepCopy(GAME_ORIGIN));
   const [currentPlayer, setCurrentPlayer] = React.useState<Players>(PLAYER_1);
+  const [possibleMoves, setPossibleMoves] = React.useState<Game>(GAME_ORIGIN);
   const [opponent, setOpponent] = React.useState<Players>(PLAYER_2);
   const [winState, setWinState] = React.useState<GameTileState>(null);
-  const [activePiece, setActivePiece] = React.useState<GameTileState[]>([
-    null,
-    null
-  ]);
+  const [activePiece, setActivePiece] = React.useState<number[]>();
 
   /**
    * Resets the game state
@@ -57,76 +30,56 @@ function App() {
     setWinState(null);
   };
 
-  /**
-   * Returns a closure to handle board position selected by current player
-   * @param boardPosition
-   * @returns closure
-   */
-  const handleMovePiece = (attemptCoords: number[]) => {
-    // The position already contains a piece, bail!
-    if (game[attemptCoords[0]][attemptCoords[1]] !== null) {
-      return;
+  const handleActivePiece = (pieceCoords: number[]) => {
+    const coordsOnly = [pieceCoords[0], pieceCoords[1]];
+    console.log({ coordsOnly, activePiece });
+    const newGameState = deepCopy(game);
+
+    if (activePiece) {
+      game.forEach((x, xi) =>
+        x.forEach((y, yi) => {
+          if (
+            isEqual(coordsOnly, [xi, yi]) &&
+            possibleMoves[xi][yi] === currentPlayer
+          ) {
+            newGameState[xi][yi] = currentPlayer;
+            newGameState[activePiece[0]][activePiece[1]] = null;
+            setActivePiece([xi, yi]);
+            setPossibleMoves((gameState) => {
+              const moves = findMoves(
+                currentPlayer,
+                opponent,
+                pieceCoords,
+                gameState
+              );
+              console.log({ moves });
+              return moves;
+            });
+          }
+        })
+      );
     }
 
-    const gameState = deepCopy(game);
+    setGame(newGameState);
 
-    // check for any valid move
-    (Object.keys(possibleMoves) as (keyof typeof possibleMoves)[]).forEach((dr) => {
-      const checkMove = possibleMoves[dr];
-      const checkAttack = possibleAttacks[dr];
-      const ax = activePiece[0];
-      const ay = activePiece[1];
-      // null check
-      if (ax === null || ay === null) {
-        return;
-      }
-      // ignore out of bounds
-      if (gameState[possibleMoves[dr].x + ax] === undefined) {
-        return;
-      }
-      if (
-        gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
-        undefined
-      ) {
-        return;
-      }
-      // if move is valid, set player
-      if (isEqual(attemptCoords, [checkMove.x + ax, checkMove.y + ay])) {
-        gameState[ax][ay] = null;
-        gameState[attemptCoords[0]][attemptCoords[1]] = currentPlayer;
-      }
-      // if attack is valid, do nothing
-      if (isEqual(attemptCoords, [checkAttack.x + ax, checkAttack.y + ay])
-        && gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
-        opponent) {
-        // action was valid, change game state and clear the active piece
-        gameState[ax][ay] = null;
-        gameState[attemptCoords[0]][attemptCoords[1]] = currentPlayer;
-        gameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] = null;
-      }
-
-      setGame(gameState);
-      setActivePiece([null, null]);
-    });
-
-    // TODO: must reimplement win state logic
-    // const winner = checkWinState(gameState, boardPosition, currentPlayer);
-    // if (winner !== null) {
-    //   setWinState(winner);
-    // }
-  };
-
-  const handleActivePiece = (pieceCoords: GameTileState[]) => () => {
     if (pieceCoords[0] === null || pieceCoords[1] === null) {
       return;
     }
     if (game[pieceCoords[0]][pieceCoords[1]] === currentPlayer) {
       setActivePiece(pieceCoords);
-      return;
+      setPossibleMoves((gameState) => {
+        const moves = findMoves(
+          currentPlayer,
+          opponent,
+          pieceCoords,
+          gameState
+        );
+        console.log({ moves });
+        return moves;
+      });
     }
 
-    const coordsOnly = [pieceCoords[0], pieceCoords[1]];
-    handleMovePiece(coordsOnly);
+    // setActivePiece([...newCoords]);
   };
 
   return (
@@ -136,7 +89,8 @@ function App() {
         <h2 className='currentPlayer'>
           Current Player: <Avatar player={currentPlayer} />
           <br />
-          Current Piece: {activePiece[0]},{activePiece[1]}
+          Current Piece: {!activePiece || activePiece[0]},
+          {!activePiece || activePiece[1]}
         </h2>
         {winState === null || (
           <div className='theWinner'>
