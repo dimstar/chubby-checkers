@@ -53,16 +53,13 @@ function App() {
 
     if (game[pieceCoords[0]][pieceCoords[1]] === currentPlayer) {
       setActivePiece(pieceCoords);
-      setPossibleMoves((gameState) => {
-        const moves = findMoves(
-          currentPlayer,
-          opponent,
-          pieceCoords,
-          gameState
-        );
-        console.log({ movesOfActivePiece: moves });
-        return moves;
-      });
+      const moves = findMoves(
+        currentPlayer,
+        opponent,
+        pieceCoords,
+        game
+      );
+      setPossibleMoves(moves);
       return;
     }
 
@@ -76,16 +73,18 @@ function App() {
             newGameState[xi][yi] = currentPlayer;
             newGameState[activePiece[0]][activePiece[1]] = null;
             setActivePiece([xi, yi]);
-            setPossibleMoves((gameState) => {
-              const moves = findMoves(
-                currentPlayer,
-                opponent,
-                pieceCoords,
-                gameState
-              );
-              console.log({ movesAfterMove: moves });
-              return moves;
-            });
+            const moves = findMoves(
+              currentPlayer,
+              opponent,
+              pieceCoords,
+              game
+            );
+            setPossibleMoves(moves);
+          }
+
+          // Handle kill
+          if (possibleMoves[xi][yi] === 'kill') {
+            newGameState[xi][yi] = null;
           }
         })
       );
