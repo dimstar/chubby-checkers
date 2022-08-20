@@ -64,22 +64,24 @@ function findMoves(
           ) {
             return;
           }
+          // if spot it occupied, check attack
+          if (gameState[checkMove.x + ax][checkMove.y + ay] === opponent) {
+            // if attack is valid, set player
+            if (
+              isEqual(attemptCoords, [checkAttack.x + ax, checkAttack.y + ay])
+            ) {
+              console.log('attack!');
+              newGameState[ax][ay] = null;
+              newGameState[attemptCoords[0]][attemptCoords[1]] = currentPlayer;
+              newGameState[checkMove.x + ax][checkMove.y + ay] = 'kill';
+            }
+            return;
+          }
+
           // if move is valid, set player
           if (isEqual(attemptCoords, [checkMove.x + ax, checkMove.y + ay])) {
             newGameState[ax][ay] = null;
             newGameState[attemptCoords[0]][attemptCoords[1]] = currentPlayer;
-          }
-          // if attack is valid, do nothing
-          if (
-            isEqual(attemptCoords, [checkAttack.x + ax, checkAttack.y + ay]) &&
-            newGameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] ===
-              opponent
-          ) {
-            // action was valid, change game state and clear the active piece
-            newGameState[ax][ay] = null;
-            newGameState[attemptCoords[0]][attemptCoords[1]] = currentPlayer;
-            newGameState[possibleMoves[dr].x + ax][possibleMoves[dr].y + ay] =
-              null;
           }
         }
       );
