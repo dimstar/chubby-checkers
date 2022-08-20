@@ -2,7 +2,7 @@ import React from 'react';
 import { isEqual } from 'lodash';
 import GameTile from './components/GameTile';
 import Avatar from './components/Avatar';
-import { GAME_ORIGIN, PLAYER_1, PLAYER_2 } from './constants';
+import { GAME_ORIGIN, PLAYER_1, PLAYER_1_START, PLAYER_2, PLAYER_2_START } from './constants';
 import deepCopy from './utils/deepCpoy';
 import { Game, GameTileState, Players } from './types';
 // import checkWinState from './lib/checkWinState';
@@ -15,7 +15,7 @@ function App() {
   const players: Players[] = [PLAYER_1, PLAYER_2];
   const [game, setGame] = React.useState<Game>(deepCopy(GAME_ORIGIN));
   const [currentPlayer, setCurrentPlayer] = React.useState<Players>(PLAYER_1);
-  const [possibleMoves, setPossibleMoves] = React.useState<Game>(GAME_ORIGIN);
+  const [possibleMoves, setPossibleMoves] = React.useState<Game>(deepCopy(GAME_ORIGIN));
   const [opponent, setOpponent] = React.useState<Players>(PLAYER_2);
   const [winState, setWinState] = React.useState<GameTileState>(null);
   const [activePiece, setActivePiece] = React.useState<number[]>();
@@ -28,18 +28,49 @@ function App() {
     setCurrentPlayer(PLAYER_1);
     setGame(originCopy);
     setWinState(null);
+    setActivePiece(undefined)
+    setGame(gameState => {
+      const newGameState = deepCopy(gameState);
+      PLAYER_1_START.forEach(piece => {
+        newGameState[piece[0]][piece[1]] = PLAYER_1;
+      })
+
+      PLAYER_2_START.forEach(piece => {
+        newGameState[piece[0]][piece[1]] = PLAYER_2;
+      })
+
+      return newGameState;
+    });
   };
 
+  React.useEffect(() => {
+    handleReset();
+  }, []);
+
   const handleActivePiece = (pieceCoords: number[]) => {
-    const coordsOnly = [pieceCoords[0], pieceCoords[1]];
-    console.log({ coordsOnly, activePiece });
+
     const newGameState = deepCopy(game);
+
+    if (game[pieceCoords[0]][pieceCoords[1]] === currentPlayer) {
+      setActivePiece(pieceCoords);
+      setPossibleMoves((gameState) => {
+        const moves = findMoves(
+          currentPlayer,
+          opponent,
+          pieceCoords,
+          gameState
+        );
+        console.log({ movesOfActivePiece: moves });
+        return moves;
+      });
+      return;
+    }
 
     if (activePiece) {
       game.forEach((x, xi) =>
         x.forEach((y, yi) => {
           if (
-            isEqual(coordsOnly, [xi, yi]) &&
+            isEqual([pieceCoords[0], pieceCoords[1]], [xi, yi]) &&
             possibleMoves[xi][yi] === currentPlayer
           ) {
             newGameState[xi][yi] = currentPlayer;
@@ -52,7 +83,7 @@ function App() {
                 pieceCoords,
                 gameState
               );
-              console.log({ moves });
+              console.log({ movesAfterMove: moves });
               return moves;
             });
           }
@@ -62,24 +93,7 @@ function App() {
 
     setGame(newGameState);
 
-    if (pieceCoords[0] === null || pieceCoords[1] === null) {
-      return;
-    }
-    if (game[pieceCoords[0]][pieceCoords[1]] === currentPlayer) {
-      setActivePiece(pieceCoords);
-      setPossibleMoves((gameState) => {
-        const moves = findMoves(
-          currentPlayer,
-          opponent,
-          pieceCoords,
-          gameState
-        );
-        console.log({ moves });
-        return moves;
-      });
-    }
-
-    // setActivePiece([...newCoords]);
+    console.log({ activePiece });
   };
 
   return (
@@ -124,6 +138,7 @@ function App() {
             type='button'
             onClick={() => {
               setCurrentPlayer(somePlayer);
+              setActivePiece(undefined);
               setOpponent(somePlayer === PLAYER_1 ? PLAYER_2 : PLAYER_1);
             }}
             disabled={winState !== null}
